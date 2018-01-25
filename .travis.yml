@@ -1,7 +1,7 @@
 language: android
 
-before_install:
-- yes | sdkmanager --licenses
+#before_install:
+#- yes | sdkmanager --licenses
 
 android:
   components:
