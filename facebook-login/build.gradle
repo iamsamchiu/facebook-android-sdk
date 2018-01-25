@@ -1,4 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'findbugs'
+apply plugin: 'pmd'
+apply plugin: 'checkstyle'
+
 
 project.group 'com.facebook.android'
 
@@ -40,11 +44,92 @@ android {
     }
 
     buildTypes {
+        debug {
+            testCoverageEnabled = true 
+        }
         release {
+            testCoverageEnabled = true 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
 }
+
+
+
+check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint', 'cpd'
+
+
+task findbugs(type: FindBugs) {
+    ignoreFailures = true
+    effort = "default"
+    reportLevel = "medium"
+    excludeFilter = new File("${project.rootDir}/config/findbugs/findbugs-filter.xml")
+    classes = files("${project.rootDir}/facebook-login/build/intermediates/classes")
+    source = fileTree('src/main/java/')
+    classpath = files()
+    reports {
+        xml.enabled = true
+        html.enabled = false
+        xml {
+            destination "$project.buildDir/reports/findbugs/findbugs-output.xml"
+        }
+        html {
+            destination "$project.buildDir/reports/findbugs/findbugs-output.html"
+        }
+    }
+}
+
+task pmd(type: Pmd) {
+    ignoreFailures = true
+    ruleSetFiles = files("${project.rootDir}/config/pmd/ruleset.xml")
+    ruleSets = []
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    reports {
+        xml.enabled = true
+        html.enabled = false
+        xml {
+            destination "$project.buildDir/reports/pmd/pmd.xml"
+        }
+        html {
+            destination "$project.buildDir/reports/pmd/pmd.html"
+        }
+    }
+}
+
+/* add CPD to check trigger 1*/
+task cpd << {
+    File outDir = new File("${buildDir}/reports/pmd/cpd")
+    outDir.mkdirs()
+    ant.taskdef(name: 'cpd',
+            classname: 'net.sourceforge.pmd.cpd.CPDTask',
+            classpath: configurations.pmd.asPath)
+    ant.cpd(minimumTokenCount: '100',
+            format: 'xml',
+            outputFile: new File(outDir , 'cpd.xml')) {
+        fileset(dir: "src/main/java") {
+            include(name: '**/*.java')
+        }
+    }
+}
+
+
+task checkstyle(type: Checkstyle) {
+    configFile file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    configProperties.checkstyleSuppressionsPath = file("${project.rootDir}/config/checkstyle/suppressions.xml").absolutePath
+    //source 'src/main'
+    source = fileTree('src/main/java/')
+    include '**/*.java'
+    exclude '**/gen/**'
+    classpath = files()
+}
+
+
 
 apply from: "${rootDir}/maven.gradle"

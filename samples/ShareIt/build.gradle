@@ -22,12 +22,18 @@ android {
         targetSdkVersion project.ext.targetSdk
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     buildTypes {
         debug {
+            testCoverageEnabled = true 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
         }
         release {
+            testCoverageEnabled = true 
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
         }
