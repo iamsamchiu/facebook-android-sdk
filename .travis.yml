@@ -13,6 +13,9 @@ android:
     - android-23
     - extra
 
+script:
+  - rsync -avhP ./android-licenses/ "$ANDROID_HOME/licenses/"
+
 # Override the install and test so that we don't run integration tests
 install:
   - ./gradlew assemble
