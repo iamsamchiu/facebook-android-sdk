@@ -2,6 +2,8 @@ language: android
 
 #before_install:
 #- yes | sdkmanager --licenses
+before_install:
+  - bash ./android-licenses/copy_licenses.sh
 
 android:
   components:
